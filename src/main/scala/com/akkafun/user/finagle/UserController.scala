@@ -1,5 +1,6 @@
 package com.akkafun.user.finagle
 
+import com.akkafun.user.filter.UserRequest
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Status, Version, Response, Request}
 import com.twitter.util.Future
@@ -13,17 +14,25 @@ object UserController {
 
   val userService = new UserService
 
-  class FreezeBalance extends Service[Request, Response] {
-    override def apply(request: Request): Future[Response] = {
-      val userId = request.getLongParam("userId")
+  class FreezeBalance extends Service[UserRequest, Response] {
+    override def apply(userRequest: UserRequest): Future[Response] = {
+      val request = userRequest.request
       val tradeId = request.getLongParam("tradeId")
       val balance = request.getLongParam("balance")
       val remark = request.getParam("remark")
 
-      val result = userService.freezeBalance(userId, tradeId, balance, remark)
-      val response = Response(Version.Http11, Status.Ok)
-      response.contentString = result.toString
-      Future(response)
+      userService.freezeBalance(userRequest.user, tradeId, balance, remark).map {r =>
+        println(s"invoke freezeBalance result: $r" )
+        val response = Response(Version.Http11, Status.Ok)
+        response.contentString = r.toString
+        response
+      } rescue {
+        case e =>
+          println(s"invoke freezeBalance found error: $e" )
+          val response = Response(Version.Http11, Status.InternalServerError)
+          response.contentString = "false"
+          Future.value(response)
+      }
     }
   }
 
