@@ -1,4 +1,4 @@
-package com.akkafun.user.finagle
+package com.akkafun.user.web
 
 import com.akkafun.user.filter.UserRequest
 import com.twitter.finagle.Service

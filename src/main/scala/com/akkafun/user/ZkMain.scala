@@ -3,7 +3,7 @@ package com.akkafun.user
 import java.net.InetSocketAddress
 
 import com.akkafun.user.filter.AuthFilter
-import com.akkafun.user.finagle.UserController
+import com.akkafun.user.web.UserController
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{Server, ServerBuilder}
 import com.twitter.finagle.http.{Http, Request, Response}

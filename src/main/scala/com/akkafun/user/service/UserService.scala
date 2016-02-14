@@ -8,6 +8,14 @@ import com.twitter.util.Future
   */
 class UserService {
 
+  /**
+    * 解冻金额,当user.balance >= user.frozenBalance + balance时解冻成功,返回true, 否则返回false
+    * @param user
+    * @param tradeId
+    * @param balance
+    * @param remark
+    * @return
+    */
   def freezeBalance(user: User, tradeId: Long, balance: Long, remark: String): Future[Boolean] = {
     Future {
       println(s"调用freezeBalance, userId: ${user.id}, tradeId: $tradeId, balance: $balance, remark: $remark")
