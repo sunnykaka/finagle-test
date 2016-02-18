@@ -1,6 +1,7 @@
 package com.akkafun.user.service
 
 import com.akkafun.user.User
+import com.twitter.finagle.tracing.Trace
 import com.twitter.util.Future
 
 /**
@@ -17,8 +18,10 @@ class UserService {
     * @return
     */
   def freezeBalance(user: User, tradeId: Long, balance: Long, remark: String): Future[Boolean] = {
+    Trace.record("接收UserService.freezeBalance 请求")
     Future {
       println(s"调用freezeBalance, userId: ${user.id}, tradeId: $tradeId, balance: $balance, remark: $remark")
+      Trace.record("发送UserService.freezeBalance 响应")
       if(balance > 0L && user.balance - user.frozenBalance >= balance) {
         val newUser = user.copy(frozenBalance = user.frozenBalance + balance)
         setUser(newUser)
