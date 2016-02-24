@@ -2,44 +2,39 @@ package com.akkafun.user.web
 
 import java.net.InetSocketAddress
 
-import com.akkafun.user.filter.{UserRequest, AuthFilter}
-import com.twitter.finagle.Service
-import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder, Server}
-import com.twitter.finagle.http.{Status, Request, Http, Response}
+import com.akkafun.user.filter.AuthFilter
+import com.twitter.finagle.http.{Request, Response, Status}
+import com.twitter.finagle.{Http, ListeningServer, Service}
 import com.twitter.util.Await
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfter, FunSuite, Matchers}
+import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, FunSuite, Matchers}
 
 /**
   * Created by liubin on 2016/2/14.
   */
 class UserControllerTest extends FunSuite with Matchers with BeforeAndAfterAll with BeforeAndAfter {
 
-  var server: Server = _
+  var server: ListeningServer = _
   var client: Service[Request, Response] = _
 
   override protected def beforeAll(): Unit = {
     val s1: Service[Request, Response] = new AuthFilter andThen new UserController.FreezeBalance
 
-    val server: Server = ServerBuilder()
-      .codec(Http())
-      .bindTo(new InetSocketAddress(8081))
-      .name("userserver-test")
-      .build(s1)
+    val server = Http.server.
+      withLabel("userserver-test").
+      serve(new InetSocketAddress(8081), s1)
 
     this.server = server
 
   }
 
   override protected def afterAll(): Unit = {
-    Await.ready(server.close())
+    Await.result(server.close())
   }
 
   before {
-    val client: Service[Request, Response] = ClientBuilder()
-      .codec(Http())
-      .hosts(new InetSocketAddress(8081))
-      .hostConnectionLimit(1)
-      .build()
+    val client: Service[Request, Response] = Http.client
+      .withLabel("userserver-test-client")
+      .newService("127.0.0.1:8081")
 
     this.client = client
   }
