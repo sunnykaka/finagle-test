@@ -17,7 +17,7 @@ object Main {
 
   def main(args: Array[String]): Unit = {
 
-    val useZk = true
+    val useZk = false
 
     val s1: Service[Request, Response] = new AuthFilter andThen new UserController.FreezeBalance
 
